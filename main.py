@@ -1,4 +1,5 @@
 import argparse
+import cv2
 import json
 import logging
 import os
@@ -23,6 +24,21 @@ def find_files(dir, ext = "png"):
                 matched_files.append(os.path.join(root, file))
     return matched_files
 
+def convert_to_video(files, output):
+    # 画像を読み込む
+    images = []
+    for file in files:
+        img = cv2.imread(file)
+        images.append(img)
+
+    # 動画に変換
+    height, width, layers = images[0].shape
+    size = (width, height)
+    video = cv2.VideoWriter(output, cv2.VideoWriter_fourcc(*'mp4v'), 1, size)
+    for img in images:
+        video.write(img)
+    video.release()
+
 def main():
     # loggingを設定
     setup_logging()
@@ -41,17 +57,17 @@ def main():
     for f in files:
         logging.debug("  {}".format(f))
     
-    # 連結して動画にする
-    logging.debug("Conversion to be implemented")
-
     # ディレクトリを作る
     outdir = os.path.join(os.path.dirname(__file__), settings["output-dir"])    
     if not os.path.exists(outdir):
         logging.debug("{} created".format(outdir))
         os.makedirs(outdir)
 
-    # ファイル出力する
+    # 連結して動画にする
+    outfile = os.path.join(outdir, settings["output-file"])
+    convert_to_video(files, outfile)
     logging.debug("AAA.mp4 created")
+
 
 if __name__ == '__main__':
     main()
